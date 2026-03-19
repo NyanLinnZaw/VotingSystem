@@ -19,11 +19,11 @@ pipeline {
             }
         }
 
-        stage('Start Docker') {
-            steps {
-                bat 'wsl sudo service docker start'
-            }
-        }
+        // stage('Start Docker') {
+        //     steps {
+        //         bat 'wsl sudo service docker start'
+        //     }
+        // }
 
         stage('Set Minikube Docker Env') {
             steps {
