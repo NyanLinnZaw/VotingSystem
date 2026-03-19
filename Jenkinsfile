@@ -34,14 +34,14 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'wsl docker build -t %IMAGE_NAME% .'
+                bat 'docker build -t %IMAGE_NAME% .'
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'wsl kubectl apply -f k8s/deployment.yaml'
-                bat 'wsl kubectl apply -f k8s/service.yaml'
+                bat 'kubectl apply -f k8s/deployment.yaml'
+                bat 'kubectl apply -f k8s/service.yaml'
             }
         }
 
