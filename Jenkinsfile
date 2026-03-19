@@ -25,16 +25,16 @@ pipeline {
         //     }
         // }
 
-        stage('Set Minikube Docker Env') {
-            steps {
-                bat 'wsl minikube -p minikube docker-env --shell cmd > env.cmd'
-                bat 'call env.cmd'
-            }
-        }
+        // stage('Set Minikube Docker Env') {
+        //     steps {
+        //         bat 'wsl minikube -p minikube docker-env --shell cmd > env.cmd'
+        //         bat 'call env.cmd'
+        //     }
+        // }
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t %IMAGE_NAME% .'
+                bat 'wsl docker build -t %IMAGE_NAME% .'
             }
         }
 
