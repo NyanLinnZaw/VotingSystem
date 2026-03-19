@@ -21,13 +21,13 @@ pipeline {
 
         stage('Start Docker') {
             steps {
-                bat 'wsl sudo service docker start'
+                bat 'sudo service docker start'
             }
         }
 
         stage('Set Minikube Docker Env') {
             steps {
-                bat 'wsl minikube -p minikube docker-env --shell cmd > env.cmd'
+                bat 'minikube -p minikube docker-env --shell cmd > env.cmd'
                 bat 'call env.cmd'
             }
         }
@@ -40,14 +40,14 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'wsl kubectl apply -f k8s/deployment.yaml'
-                bat 'wsl kubectl apply -f k8s/service.yaml'
+                bat 'kubectl apply -f k8s/deployment.yaml'
+                bat 'kubectl apply -f k8s/service.yaml'
             }
         }
 
         stage('Verify') {
             steps {
-                bat 'wsl kubectl get pods'
+                bat 'kubectl get pods'
             }
         }
     }
