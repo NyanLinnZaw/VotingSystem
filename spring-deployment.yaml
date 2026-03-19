@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: votingsystem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: votingsystem
+  template:
+    metadata:
+      labels:
+        app: votingsystem
+    spec:
+      containers:
+        - name: votingsystem
+          image: votingsystem:latest      # exact name from minikube image list
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8083            # change to 8083 since 8080 is Jenkins
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/voting_db
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: root123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: votingsystem
+spec:
+  selector:
+    app: votingsystem
+  ports:
+    - port: 8083
+      targetPort: 8081
+  type: NodePort
