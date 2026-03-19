@@ -9,45 +9,36 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/NyanLinnZaw/VotingSystem.git'
+                git branch: 'main',
+                    url: 'https://github.com/NyanLinnZaw/VotingSystem.git'
             }
         }
 
-        stage('Build JAR') {
+        stage('Build + Docker + K8s (WSL)') {
             steps {
-                bat '.\\mvnw.cmd clean package -DskipTests'
-            }
-        }
+                bat '''
+                wsl bash -c "
+                set -e
 
-        // stage('Start Docker') {
-        //     steps {
-        //         bat 'wsl sudo service docker start'
-        //     }
-        // }
+                cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/VotingSystem
 
-        // stage('Set Minikube Docker Env') {
-        //     steps {
-        //         bat 'wsl minikube -p minikube docker-env --shell cmd > env.cmd'
-        //         bat 'call env.cmd'
-        //     }
-        // }
+                echo '== Build JAR =='
+                mvn clean package -DskipTests
 
-        stage('Build Docker Image') {
-            steps {
-                bat 'docker build -t %IMAGE_NAME% .'
-            }
-        }
+                echo '== Use Minikube Docker =='
+                eval $(minikube docker-env)
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                bat 'kubectl apply -f k8s/deployment.yaml'
-                bat 'kubectl apply -f k8s/service.yaml'
-            }
-        }
+                echo '== Build Docker Image =='
+                docker build -t voting-system .
 
-        stage('Verify') {
-            steps {
-                bat 'kubectl get pods'
+                echo '== Deploy to Kubernetes =='
+                kubectl apply -f k8s/deployment.yaml
+                kubectl apply -f k8s/service.yaml
+
+                echo '== Verify =='
+                kubectl get pods
+                "
+                '''
             }
         }
     }
