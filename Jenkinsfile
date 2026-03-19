@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent docker { image 'maven:3.9.5-openjdk-17' }
 
     environment {
         IMAGE_NAME = "voting-system"
