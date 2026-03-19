@@ -1,5 +1,5 @@
 pipeline {
-    agent docker { image 'maven:3.9.5-openjdk-17' }
+    agent any
 
     environment {
         IMAGE_NAME = "voting-system"
@@ -15,7 +15,7 @@ pipeline {
 
         stage('Build JAR') {
             steps {
-                bat 'mvn clean package -DskipTests'
+                bat '.\\mvnw.cmd clean package -DskipTests'
             }
         }
 
