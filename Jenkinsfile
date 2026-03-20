@@ -9,35 +9,34 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/NyanLinnZaw/VotingSystem.git'
+                git branch: 'main', url: 'https://github.com/NyanLinnZaw/VotingSystem.git'
             }
         }
 
-        stage('Build + Docker + K8s (WSL)') {
+        stage('Build JAR') {
             steps {
-                bat '''
-                wsl bash -c "
-                set -e
+                sh 'mvn clean package -DskipTests'
+            }
+        }
 
-                cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/VotingSystem
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME} ."
+            }
+        }
 
-                echo '== Build JAR =='
-                mvn clean package -DskipTests
-
-                echo '== Use Minikube Docker =='
-                eval $(minikube docker-env)
-
-                echo '== Build Docker Image =='
-                docker build -t voting-system .
-
-                echo '== Deploy to Kubernetes =='
-                kubectl apply -f k8s/deployment.yaml
-                kubectl apply -f k8s/service.yaml
-
-                echo '== Verify =='
+        stage('Deploy to Minikube') {
+            steps {
+                sh '''
+                # Use Minikube docker-env
+                eval $(minikube -p minikube docker-env)
+                
+                # Deploy
+                kubectl apply -f spring-deployment.yaml
+                kubectl apply -f mysql-service.yaml
+                
+                # Verify
                 kubectl get pods
-                "
                 '''
             }
         }
