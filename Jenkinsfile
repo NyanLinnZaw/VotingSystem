@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = "voting-system"
-        WORKSPACE_DIR = "/var/jenkins_home/workspace/VotingSystem"
     }
 
     stages {
@@ -16,19 +15,19 @@ pipeline {
 
         stage('Build JAR') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                bat 'mvn clean package -DskipTests'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME} ."
+                bat "docker build -t ${IMAGE_NAME} ."
             }
         }
 
         stage('Deploy to Minikube') {
             steps {
-                sh '''
+                bat '''
                 # Use Minikube docker-env
                 eval $(minikube -p minikube docker-env)
                 
