@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        docker { image 'jenkins/jenkins:lts' }
+    }
 
     environment {
         IMAGE_NAME = "voting-system"
