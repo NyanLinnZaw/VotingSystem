@@ -1,10 +1,9 @@
 pipeline {
-    agent {
-        docker { image 'jenkins/jenkins:lts' }
-    }
+    agent any
 
     environment {
         IMAGE_NAME = "voting-system"
+        WORKSPACE_DIR = "/var/jenkins_home/workspace/VotingSystem"
     }
 
     stages {
