@@ -9,35 +9,47 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/NyanLinnZaw/VotingSystem.git'
+                bat 'git clone -b main https://github.com/NyanLinnZaw/VotingSystem.git %WORKSPACE%\\VotingSystem'
             }
         }
 
-        stage('Build JAR') {
+        stage('Build JAR (Maven in Docker)') {
             steps {
-                bat 'mvn clean package -DskipTests'
+                // Use Maven Docker image to build project without installing Maven on host
+                bat '''
+                docker run --rm ^
+                    -v "%WORKSPACE%\\VotingSystem:/app" ^
+                    -w /app ^
+                    maven:3.9.6-eclipse-temurin-17 ^
+                    mvn clean package -DskipTests
+                '''
+            }
+        }
+
+        stage('Set Minikube Docker Env') {
+            steps {
+                // Windows version of minikube docker-env
+                bat 'minikube -p minikube docker-env --shell cmd > env.cmd'
+                bat 'call env.cmd'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat "docker build -t ${IMAGE_NAME} ."
+                bat 'docker build -t %IMAGE_NAME% %WORKSPACE%\\VotingSystem'
             }
         }
 
-        stage('Deploy to Minikube') {
+        stage('Deploy to Kubernetes') {
             steps {
-                bat '''
-                # Use Minikube docker-env
-                eval $(minikube -p minikube docker-env)
-                
-                # Deploy
-                kubectl apply -f spring-deployment.yaml
-                kubectl apply -f mysql-service.yaml
-                
-                # Verify
-                kubectl get pods
-                '''
+                bat 'kubectl apply -f %WORKSPACE%\\VotingSystem\\spring-deployment.yaml'
+                bat 'kubectl apply -f %WORKSPACE%\\VotingSystem\\myql-deployment.yaml'
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                bat 'kubectl get pods'
             }
         }
     }
